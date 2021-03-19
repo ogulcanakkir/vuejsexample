@@ -1,4 +1,4 @@
-VUE.js example
+VUE.js example <br/>
 Virtual DOM
 
 <img src="https://vuejs.org/images/logo.png" height="100" />
