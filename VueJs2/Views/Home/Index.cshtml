@@ -1,0 +1,95 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@section Styles{
+
+    <link href="~/css/StyleSheet.css" rel="stylesheet" />
+}
+
+
+@section Scripts{
+    <script src="https://www.openlayers.org/api/OpenLayers.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script>
+
+        var app = new Vue({
+            el: "#app",
+            data: {
+                jsonData: null
+            },
+            methods: {
+                mapDraw: function (id, latitude, longitude) {
+                    $('#' + id).empty();
+                    map = new OpenLayers.Map(id);
+                    map.addLayer(new OpenLayers.Layer.OSM());
+
+                    var lonLat = new OpenLayers.LonLat(latitude, longitude)
+                        .transform(
+                            new OpenLayers.Projection("EPSG:4326"),
+                            map.getProjectionObject()
+                        );
+
+                    var zoom = 15;
+
+                    var markers = new OpenLayers.Layer.Markers("Markers");
+                    map.addLayer(markers);
+
+                    markers.addMarker(new OpenLayers.Marker(lonLat));
+
+                    map.setCenter(lonLat, zoom);
+                }
+            },
+            created() {
+                $.get('Home/GetUser')
+                    .then(data => {
+                        this.jsonData = data;//result[Math.floor((Math.random() * result.length) + 1)];
+                    });
+            }
+        })
+    </script>
+}
+<div id="app">
+    <div class="row">
+        <div v-for="item in jsonData" class="profile-card js-profile-card">
+            <div class="profile-card__img">
+
+                <img src="~/img/pp.jfif" alt="profile card" v-if="item.id == 1">
+
+                <img src="~/img/pp1.jfif" alt="profile card" v-if="item.id == 2">
+
+                <img src="https://www.seekpng.com/png/full/847-8474751_download-empty-profile.png" alt="profile card" v-if="item.id != 2 && item.id != 1">
+            </div>
+
+            <div class="profile-card__cnt js-profile-cnt">
+                <div class="profile-card__name">{{item.name}}</div>
+                <div class="profile-card__txt"><b>{{item.title}}</b> from <b>{{item.company}}</b></div>
+                <div class="profile-card-loc">
+
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <button class="btn btn-danger" v-on:click="mapDraw(item.password,item.latitude, item.longitude)"> Get Map</button>
+                        </li>
+                        <li class="list-group-item">Name: <input type="text" v-model="item.name" /></li>
+                        <li class="list-group-item">latitude: <input type="text" v-model="item.latitude" v-on:input="mapDraw(item.password,item.latitude, item.longitude)" /></li>
+                        <li class="list-group-item">longitude: <input type="text" v-model="item.longitude" v-on:input="mapDraw(item.password,item.latitude, item.longitude)" /></li>
+                    </ul>
+
+                </div>
+                <br />
+                <div>
+                    <ul class="list-group">
+                        <li class="list-group-item"><b>{{item.city}} , {{item.country}}</b></li>
+                        <li class="list-group-item"><b>UserName:</b> {{item.userName}}</li>
+                        <li class="list-group-item"><b>Email:</b> {{item.email}}</li>
+                        <li class="list-group-item"><b>Password:</b> {{item.password}}</li>
+                    </ul>
+                </div>
+                <div>
+                    <div v-bind:id="item.password" style="width:400px; height:500px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
